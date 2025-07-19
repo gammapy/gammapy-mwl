@@ -7,8 +7,8 @@ from regions import Regions
 from gammapy.utils.scripts import make_path, make_name
 from gammapy.maps import RegionNDMap, MapAxis, RegionGeom, WcsGeom
 from gammapy.irf import EDispKernel, EDispKernelMap
-from gammapy.datasets import SpectrumDatasetOnOff
-from .spectrumdataset import SpectrumDatasetChi2
+from gammapy.datasets import SpectrumDatasetOnOff,SpectrumDatasetChi2
+#from .spectrumdataset import SpectrumDatasetChi2
 from gammapy.data import GTI
 
 __all__ = ["StandardOGIPDatasetReader"]

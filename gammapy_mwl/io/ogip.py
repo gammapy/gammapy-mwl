@@ -8,7 +8,8 @@ from regions import Regions
 from gammapy.utils.scripts import make_path, make_name
 from gammapy.maps import RegionNDMap, MapAxis, RegionGeom, WcsGeom
 from gammapy.irf import EDispKernel, EDispKernelMap
-from gammapy.datasets import SpectrumDatasetOnOff
+from gammapy.datasets import SpectrumDatasetOnOff,SpectrumDatasetChi2
+#from .spectrumdataset import SpectrumDatasetChi2
 from gammapy.data import GTI
 
 __all__ = ["StandardOGIPDatasetReader"]
@@ -220,7 +221,8 @@ class StandardOGIPDatasetReader:
         """
         spectrum_data = {}
         pha_meta = pha_table.meta
-
+        is_rate_pha = False
+        
         if pha_meta.get("HDUCLASS") != "OGIP":
             raise ValueError("Input file is not an OGIP file.")
         if pha_meta.get("HDUCLAS1") != "SPECTRUM":
@@ -228,13 +230,22 @@ class StandardOGIPDatasetReader:
         if pha_meta.get("HDUCLAS2") == "NET":
             raise ValueError("Subtracted PHA files are not supported.")
         if pha_meta.get("HDUCLAS3") == "RATE":
-            raise ValueError("Rate PHA files are not supported.")
+            is_rate_pha = True
+            #raise ValueError("Rate PHA files are not supported.")
         if pha_meta.get("HDUCLAS4") == "TYPE:II":
             raise ValueError("Type II PHA files are not supported.")
 
         spectrum_data["livetime"] = pha_meta["EXPOSURE"] * u.s
         spectrum_data["channel"] = pha_table["CHANNEL"]
+        
+        if is_rate_pha:
+            pha_table['COUNTS'] = (pha_table['RATE'] * pha_meta["EXPOSURE"] * u.s).to(u.ct)
+            if "STAT_ERR" in pha_table.colnames:
+                pha_table['STAT_ERR'] = (pha_table['STAT_ERR'] * pha_meta["EXPOSURE"] * u.s).to(u.ct)
+        
         spectrum_data["counts"] = pha_table["COUNTS"]
+        if "STAT_ERR" in pha_table.colnames:
+            spectrum_data["sigma"] = pha_table["STAT_ERR"]
 
         mask_safe = True
         if "QUALITY" in pha_table.columns:
@@ -280,7 +291,7 @@ class StandardOGIPDatasetReader:
         data = self.extract_spectrum(pha_table)
         region, wcs = self._read_regions(hdulist)
         gti = self._read_gti(hdulist)
-
+        
         if filenames is None:
             filenames = self.get_filenames(pha_meta=pha_table.meta)
 
@@ -292,18 +303,23 @@ class StandardOGIPDatasetReader:
         if str(filenames["arffile"]).split("/")[-1] != "NONE":
             arf_table = Table.read(filenames["arffile"], hdu="SPECRESP")
 
-        bkg_table = Table.read(filenames["bkgfile"])
-        data_bkg = self.extract_spectrum(bkg_table)
-
+        if filenames["bkgfile"]!=None:           
+            bkg_table = Table.read(filenames["bkgfile"])
+            data_bkg = self.extract_spectrum(bkg_table)
+        else:
+            excess = np.asarray(data["counts"].data)
+            sigma  = np.asarray(data["sigma"].data)
+            
         geom = RegionGeom(region=region, wcs=wcs, axes=[energy_axis])
 
         counts = RegionNDMap(geom=geom, data=data["counts"].data, unit="")
         acceptance = RegionNDMap(geom=geom, data=data["acceptance"], unit="")
         mask_safe = RegionNDMap(geom=geom, data=data["mask_safe"], unit="")
 
-        counts_off = RegionNDMap(geom=geom, data=data_bkg["counts"].data, unit="")
-        acceptance_off = RegionNDMap(geom=geom, data=data_bkg["acceptance"], unit="")
-
+        if filenames["bkgfile"]!=None:
+            counts_off = RegionNDMap(geom=geom, data=data_bkg["counts"].data, unit="")
+            acceptance_off = RegionNDMap(geom=geom, data=data_bkg["acceptance"], unit="")
+        
         geom_true = RegionGeom(region=region, wcs=wcs, axes=[energy_true_axis])
 
         if str(filenames["arffile"]).split("/")[-1] != "NONE":
@@ -333,18 +349,31 @@ class StandardOGIPDatasetReader:
         #    grouping_axis = energy_axis
 
         name = make_name(name)
-        dataset = SpectrumDatasetOnOff(
-            name=name,
-            counts=counts,
-            acceptance=acceptance,
-            counts_off=counts_off,
-            acceptance_off=acceptance_off,
-            edisp=edisp,
-            exposure=exposure,
-            mask_safe=mask_safe,
-            gti=gti,
-            meta_table=pha_table.meta,
-        )
+        if filenames["bkgfile"]==None:
+            sigma = RegionNDMap(geom=geom, data=data["sigma"].data, unit="")
+            dataset = SpectrumDatasetChi2(
+                name=name,
+                counts=counts,
+                sigma=sigma,
+                edisp=edisp,
+                exposure=exposure,
+                mask_safe=mask_safe,
+                gti=gti,
+                meta_table=pha_table.meta,
+            )
+        else:
+            dataset = SpectrumDatasetOnOff(
+                name=name,
+                counts=counts,
+                acceptance=acceptance,
+                counts_off=counts_off,
+                acceptance_off=acceptance_off,
+                edisp=edisp,
+                exposure=exposure,
+                mask_safe=mask_safe,
+                gti=gti,
+                meta_table=pha_table.meta,
+            )
 
         if "livetime" not in dataset.exposure.meta:
            dataset.exposure.meta['livetime'] = data["livetime"]

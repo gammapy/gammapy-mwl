@@ -58,6 +58,14 @@ EXPECTED_SHAPES = {
         "edisp": (1024, 1024, 1, 1),
         "exposure": (1024, 1, 1),
     },
+    "data/chandra/acis/circle30arcs.pi": {
+        "counts": (1024,1,1),
+        "acceptance": (1024,1,1),
+        "counts_off": (1024,1,1),
+        "acceptance_off": (1024,1,1),
+        "edisp": (1070, 1024, 1, 1),
+        "exposure": (1070, 1, 1),
+    },
 }
 
 EXPECTED_SUMS = {
@@ -108,6 +116,14 @@ EXPECTED_SUMS = {
         "acceptance_off": 248401.46840409856,
         "edisp": 1024,
         "exposure": 91403235.31326437,
+    },
+    "data/chandra/acis/circle30arcs.pi": {
+        "counts": 4348,
+        "acceptance": 6770.849424893879,
+        "counts_off": 33190,
+        "acceptance_off": 88368.86537272263,
+        "edisp": 1070.0247,
+        "exposure": 236322.58,
     },
 }
 

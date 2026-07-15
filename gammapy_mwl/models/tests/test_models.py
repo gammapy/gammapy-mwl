@@ -20,7 +20,7 @@ def test_SherpaSpectralModel():
     #abs_model.nH = 5
 
     # Gammapy wrapper
-    f1 = SherpaSpectralModel(plaw)
+    f1 = SherpaSpectralModel(plaw, integrated=False)
     #f2 = SherpaSpectralModel(abs_model, default_units=(u.keV, 1))
     f3 = f1  #* f2
 
@@ -127,7 +127,7 @@ def test_SherpaSpectralModel_multicomponent():
     sherpa_model = plaw + plaw2
 
     # Gammapy wrapper
-    gammapy_model = SherpaSpectralModel(sherpa_model)
+    gammapy_model = SherpaSpectralModel(sherpa_model, integrated=False)
 
     assert_allclose(gammapy_model(energy_grid).value[:-1], sherpa_model(energy_grid.value)[:-1])
     assert_allclose(gammapy_model.evaluate(energy_grid,2,1,1e-3,5).value[:-1], sherpa_model(energy_grid.value)[:-1])

@@ -11,6 +11,11 @@ class SherpaSpectralModel(SpectralModel):
     ----------
     sherpa_model :
         An instance of the models defined in `~sherpa.models` or `~sherpa.astro.xspec`.
+    integrated:
+        Set to True for correct evaluation of `sherpa.astro.xspec.XSAdditiveModel` models (additive XSpec models)
+        or more-component models containing an additive XSpec model (e.g. apec, TBabs*apec).
+        False for other models, such as `sherpa.models.basic` (e.g. PowLaw1D)
+        or `sherpa.astro.xspec.XSMultiplicativeModel` models (e.g. TBabs). Default is True.
     default_units : tuple
         Units of the input energy array and output model evaluation (find them in the sherpa/xspec docs!)
     """
@@ -18,9 +23,10 @@ class SherpaSpectralModel(SpectralModel):
     tag = ["SherpaSpectralModel", "sherpa", "xspec"]
 
     def __init__(
-        self, sherpa_model, default_units=(u.keV, 1 / (u.keV * u.cm ** 2 * u.s))
+        self, sherpa_model, integrated=True, default_units=(u.keV, 1 / (u.keV * u.cm ** 2 * u.s))
     ):
         self.sherpa_model = sherpa_model
+        self.integrated = integrated
         self.default_units = default_units
         self.default_parameters = self._wrap_parameters()
         super().__init__()
@@ -30,7 +36,7 @@ class SherpaSpectralModel(SpectralModel):
         self._remove_duplicate_parameter_names()
         for par in self.sherpa_model.pars:
             parameter = Parameter(
-                name=par.name, value=par.val, frozen=par.frozen
+                name=par.name, value=par.val, frozen=par.frozen, min=par.min, max=par.max
             )
             # TODO: set unit?
             parameters.append(parameter)
@@ -65,6 +71,8 @@ class SherpaSpectralModel(SpectralModel):
         self._update_sherpa_parameters(**kwargs)
 
         y_ = self.sherpa_model(energy)[:-1]
+        if self.integrated:
+            y_ /= energy[1:] - energy[:-1]
         y_ = y_ * self.default_units[1]
 
         return y_.reshape(shape)

@@ -11,6 +11,7 @@ import logging
 from pathlib import Path
 
 import astropy.units as u
+from astropy.table import Table
 import numpy as np
 
 from gammapy.maps import MapAxis, RegionNDMap
@@ -61,10 +62,12 @@ def generate_tbabs_interp_table(outfile):
     logger.info(f"Interpolation table written to {out_path}")
 
 
+
 def get_tbabs_template_model(
     nh=None,
     tbabsfile=None,
     freeze=True,
+    outfile=None,
 ):
     """Creates a Gammapy TemplateNDSpectralModel from a pregenerated table of absorption.
     The default model is Tbabs (Wilms et al 2000, doi: 10.1086/317016).
@@ -78,6 +81,8 @@ def get_tbabs_template_model(
         Path to the interpolation ECSV file.
     freeze : bool, optional
         Whether to freeze the nH parameter. Default is True.
+    outfile : str or `~pathlib.Path`, optional
+        Path to yaml file to write model to. Required to serialise the model.
     """
     # Use relative path if none provided
     if tbabsfile is None:
@@ -119,18 +124,36 @@ def get_tbabs_template_model(
         data=transmission,
     )
 
-    template_abs_model = TemplateNDSpectralModel(
-        map=region_ndmap,
-        interp_kwargs={"method": "linear", "fill_value": 1e-5},
-    )
-
-    if nh is not None:
-        template_abs_model.nH.quantity = u.Quantity(nh, "cm-2")
-        if freeze:
-            template_abs_model.nH.frozen = True
-    else:
-        logger.warning(
-            "Generating generic template absorption model with default nH parameters."
+    if outfile is None:
+        template_abs_model = TemplateNDSpectralModel(
+            map=region_ndmap,
+            interp_kwargs={"method": "linear", "fill_value": 1e-5},
         )
+
+        if nh is not None:
+            template_abs_model.nH.quantity = u.Quantity(nh, "cm-2")
+            if freeze:
+                template_abs_model.nH.frozen = True
+        else:
+            logger.warning(
+                "Generating generic template absorption model with default nH parameters."
+            )
+
+    else:
+        template_abs_model = TemplateNDSpectralModel(
+            map=region_ndmap,
+            filename=outfile,
+            interp_kwargs={"method": "linear", "fill_value": 1e-5},
+        )
+        if nh is not None:
+            template_abs_model.nH.quantity = u.Quantity(nh, "cm-2")
+            if freeze:
+                template_abs_model.nH.frozen = True
+        else:
+            logger.warning(
+                "Generating generic template absorption model with default nH parameters."
+            )
+        template_abs_model.write(filename=outfile, overwrite=True)
+        logger.info(f"Absorption model written to {outfile}")
 
     return template_abs_model

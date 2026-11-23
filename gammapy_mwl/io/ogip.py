@@ -195,7 +195,10 @@ class StandardOGIPDatasetReader:
         if self.gti_hdu in hdulist:
             header = hdulist[self.gti_hdu].header
             gti_table = Table.read(hdulist[self.gti_hdu])
-            ref_mjd = header['MJDREFI'] + header['MJDREFF']
+            try:
+                ref_mjd = header['MJDREFI'] + header['MJDREFF']
+            except:
+                ref_mjd = header['MJDREF']
             if gti_table['START'].unit == 's':
                 gti_table['START'] = Time(ref_mjd + gti_table['START'].to('s').value / 86400., format='mjd')
                 gti_table['STOP'] = Time(ref_mjd + gti_table['STOP'].to('s').value / 86400., format='mjd')

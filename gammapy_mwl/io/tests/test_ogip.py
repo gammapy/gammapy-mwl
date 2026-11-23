@@ -152,7 +152,6 @@ EXPECTED_SUMS = {
         "data/xmm/mos2/xmm_mos2_0605960101_src.pha",
         "data/xmm/pn/xmm_pn_0605960101_src.pha",
         "data/erosita/em01_072135_820_SourceSpec_00001_c010.fits",
-        #"data/chandra/acis/circle30arcs.pi",
         "data/nustar/pha_obsNuSTAR_A.fits"
         # "data/xmm/om/xmm_om_0605960101_src.pha",
         # "data/fermi/lat/fermi_lat_00036384074_src.pha",

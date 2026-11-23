@@ -66,6 +66,14 @@ EXPECTED_SHAPES = {
         "edisp": (1070, 1024, 1, 1),
         "exposure": (1070, 1, 1),
     },
+    "data/nustar/pha_obsNuSTAR_A.fits": {
+        "counts": (128,1,1),
+        "acceptance": (128,1,1),
+        "counts_off": (128,1,1),
+        "acceptance_off": (128,1,1),
+        "edisp": (4096, 128, 1, 1),
+        "exposure": (4096, 1, 1),
+    },
 }
 
 EXPECTED_SUMS = {
@@ -125,6 +133,14 @@ EXPECTED_SUMS = {
         "edisp": 1070.0247,
         "exposure": 236322.58,
     },
+        "data/nustar/pha_obsNuSTAR_A.fits": {
+        "counts": 2337,
+        "acceptance": 111385876.90180504,
+        "counts_off": 3657,
+        "acceptance_off": 1377465983.1558526,
+        "edisp": 3058.6003,
+        "exposure": 2982318881.4038944,
+    },
 }
 
 @pytest.mark.parametrize(
@@ -136,6 +152,7 @@ EXPECTED_SUMS = {
         "data/xmm/mos2/xmm_mos2_0605960101_src.pha",
         "data/xmm/pn/xmm_pn_0605960101_src.pha",
         "data/erosita/em01_072135_820_SourceSpec_00001_c010.fits",
+        "data/nustar/pha_obsNuSTAR_A.fits"
         # "data/xmm/om/xmm_om_0605960101_src.pha",
         # "data/fermi/lat/fermi_lat_00036384074_src.pha",
         # "data/fermi/gbm/fermi_gbm_00036384074_src.pha",

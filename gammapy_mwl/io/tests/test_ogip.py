@@ -123,7 +123,7 @@ EXPECTED_SUMS = {
         "counts_off": 33190,
         "acceptance_off": 88368.86537272263,
         "edisp": 1070.0247,
-        "exposure": 236322.58,
+        "exposure": 8977721181.24137,
     },
 }
 
@@ -136,6 +136,7 @@ EXPECTED_SUMS = {
         "data/xmm/mos2/xmm_mos2_0605960101_src.pha",
         "data/xmm/pn/xmm_pn_0605960101_src.pha",
         "data/erosita/em01_072135_820_SourceSpec_00001_c010.fits",
+        "data/chandra/acis/circle30arcs.pi",
         # "data/xmm/om/xmm_om_0605960101_src.pha",
         # "data/fermi/lat/fermi_lat_00036384074_src.pha",
         # "data/fermi/gbm/fermi_gbm_00036384074_src.pha",

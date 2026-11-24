@@ -48,8 +48,7 @@ jobs:
       - name: Install sherpa via conda (non-Windows only)
         if: runner.os != 'Windows'
         run: |
-          conda install -c https://cxc.cfa.harvard.edu/conda/ciao -c conda-forge \
-          --no-deps sherpa "numpy=2.3.5"
+          conda install -c https://cxc.cfa.harvard.edu/conda/sherpa -c conda-forge sherpa
 
       - name: Install base dependencies
         run: |
@@ -63,7 +62,6 @@ jobs:
           python -c "import tox; print(f'tox {tox.__version__}')"
 
       - name: Run tests
-        if: ${{ !matrix.gammapy_data_path }}
         run: tox -e ${{ matrix.tox_env }} -- -n auto
 
       - name: Upload coverage to codecov

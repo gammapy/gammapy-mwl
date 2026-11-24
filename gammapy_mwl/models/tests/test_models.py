@@ -42,8 +42,8 @@ def test_tbabs_model():
     model = get_tbabs_template_model(nh=nh)
     
     assert model.tag[0] == "TemplateNDSpectralModel"
-    assert_allclose(model.nH.quantity, nh)
-    assert model.nH.frozen is True
+    assert_allclose(model.nh.quantity, nh)
+    assert model.nh.frozen is True
     
     # Test evaluation
     energy = [1, 2, 10] * u.keV

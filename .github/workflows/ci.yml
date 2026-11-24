@@ -41,6 +41,10 @@ jobs:
           python-version: ${{ matrix.python }}
           auto-update-conda: true
 
+      - name: Install FFTW3 (required to build Sherpa)
+        if: runner.os == 'Linux'
+        run: sudo apt-get update && sudo apt-get install -y libfftw3-dev
+
       - name: Install sherpa via conda (non-Windows only)
         if: runner.os != 'Windows'
         run: |
